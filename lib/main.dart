@@ -72,6 +72,7 @@ class _CanvasHomeState extends State<CanvasHome> {
     pdf.PdfPageFormat.a4.width,
     pdf.PdfPageFormat.a4.height,
   );
+  final Map<String, TextEditingController> _textControllers = {};
   double _scale = 0.9;
   bool _snapToGrid = true;
   bool _showGuides = true;
@@ -497,9 +498,7 @@ class _CanvasHomeState extends State<CanvasHome> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextField(
-                              controller: TextEditingController(
-                                text: e.text ?? '',
-                              ),
+                              controller: _controllerFor(e),
                               onChanged: (v) => setState(() => e.text = v),
                               decoration: const InputDecoration(
                                 labelText: 'Text',
@@ -880,6 +879,40 @@ class _CanvasHomeState extends State<CanvasHome> {
         border: OutlineInputBorder(),
       ),
     );
+  }
+
+  TextEditingController _controllerFor(CanvasElement e) {
+    final existing = _textControllers[e.id];
+    final desired = e.text ?? '';
+    if (existing != null) {
+      if (existing.text != desired) {
+        existing
+          ..text = desired
+          ..selection = TextSelection.collapsed(offset: desired.length);
+      }
+      return existing;
+    }
+    final controller = TextEditingController(text: desired);
+    _textControllers[e.id] = controller;
+    return controller;
+  }
+
+  // ignore: unused_element
+  void _disposeTextController(String id) {
+    _textControllers.remove(id)?.dispose();
+  }
+
+  void _disposeAllTextControllers() {
+    for (final controller in _textControllers.values) {
+      controller.dispose();
+    }
+    _textControllers.clear();
+  }
+
+  @override
+  void dispose() {
+    _disposeAllTextControllers();
+    super.dispose();
   }
 
   Future<void> _exportPdf() async {
