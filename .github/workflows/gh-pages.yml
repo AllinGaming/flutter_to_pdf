@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Build and Deploy Web
 
 on:
   push:
@@ -6,35 +6,53 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    env:
+      BASE_HREF: "/${{ github.event.repository.name }}/"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Flutter
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: "3.32.4"
+          channel: "stable"
 
-      - name: Install dependencies
-        working-directory: pdf_canvas
+      - name: Flutter pub get
         run: flutter pub get
 
-      - name: Run tests with coverage
-        working-directory: pdf_canvas
+      - name: Run tests
         run: flutter test --coverage
 
-      - name: Build web app
-        working-directory: pdf_canvas
-        run: flutter build web --release --base-href /${{ github.event.repository.name }}/ --no-wasm-dry-run
+      - name: Build web
+        run: flutter build web --release --base-href=${{ env.BASE_HREF }}
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: pdf_canvas/build/web
-          publish_branch: gh-pages
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
