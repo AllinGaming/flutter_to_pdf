@@ -21,17 +21,20 @@ jobs:
           channel: stable
 
       - name: Install dependencies
+        working-directory: pdf_canvas
         run: flutter pub get
 
       - name: Run tests with coverage
+        working-directory: pdf_canvas
         run: flutter test --coverage
 
       - name: Build web app
-        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
+        working-directory: pdf_canvas
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/ --no-wasm-dry-run
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: build/web
+          publish_dir: pdf_canvas/build/web
           publish_branch: gh-pages
