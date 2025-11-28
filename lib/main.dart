@@ -233,18 +233,21 @@ class _CanvasHomeState extends State<CanvasHome> {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton.icon(
+                  key: const ValueKey('add-text-button'),
                   onPressed: _addText,
                   icon: const Icon(Icons.title),
                   label: const Text('Text'),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton.icon(
+                  key: const ValueKey('add-box-button'),
                   onPressed: _addBox,
                   icon: const Icon(Icons.crop_square),
                   label: const Text('Rectangle'),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton.icon(
+                  key: const ValueKey('add-image-button'),
                   onPressed: _addImage,
                   icon: const Icon(Icons.image_outlined),
                   label: const Text('Image'),
@@ -1177,30 +1180,30 @@ class _CanvasHomeState extends State<CanvasHome> {
 
   void _addText() {
     setState(() {
-      _elements.add(
-        CanvasElement(
-          id: _uuid.v4(),
-          kind: CanvasElementKind.text,
-          offset: const Offset(40, 40),
-          size: const Size(160, 40),
-          text: 'Text',
-          textStyle: const TextStyle(fontSize: 16),
-        ),
+      final element = CanvasElement(
+        id: _uuid.v4(),
+        kind: CanvasElementKind.text,
+        offset: const Offset(40, 40),
+        size: const Size(160, 40),
+        text: 'Text',
+        textStyle: const TextStyle(fontSize: 16),
       );
+      _elements.add(element);
+      _selected = element;
     });
   }
 
   void _addBox() {
     setState(() {
-      _elements.add(
-        CanvasElement(
-          id: _uuid.v4(),
-          kind: CanvasElementKind.box,
-          offset: const Offset(80, 80),
-          size: const Size(120, 80),
-          color: _randomColor(),
-        ),
+      final element = CanvasElement(
+        id: _uuid.v4(),
+        kind: CanvasElementKind.box,
+        offset: const Offset(80, 80),
+        size: const Size(120, 80),
+        color: _randomColor(),
       );
+      _elements.add(element);
+      _selected = element;
     });
   }
 
@@ -1211,15 +1214,15 @@ class _CanvasHomeState extends State<CanvasHome> {
     );
     if (result != null && result.files.single.bytes != null) {
       setState(() {
-        _elements.add(
-          CanvasElement(
-            id: _uuid.v4(),
-            kind: CanvasElementKind.image,
-            offset: const Offset(60, 120),
-            size: const Size(180, 120),
-            bytes: result.files.single.bytes,
-          ),
+        final element = CanvasElement(
+          id: _uuid.v4(),
+          kind: CanvasElementKind.image,
+          offset: const Offset(60, 120),
+          size: const Size(180, 120),
+          bytes: result.files.single.bytes,
         );
+        _elements.add(element);
+        _selected = element;
       });
     }
   }
